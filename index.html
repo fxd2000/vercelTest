@@ -32,17 +32,24 @@
             flex-wrap: wrap;
             justify-content: center;
         }
+		.sudoku-error-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
     </style>
 </head>
 <body onload="generateSudokus()">
-<div class="sudoku-container"></div>
-<div class="sudoku-button-container">
-    <button onclick="generateSudokus()">出题</button>
-    <button onclick="verifySudokus()">提交</button>
-</div>
+	<div class="sudoku-container"></div>
+	<div class="sudoku-error-info"></div>
+	<div class="sudoku-button-container">
+		<button onclick="generateSudokus()">出题</button>
+		<button onclick="verifySudokus()">提交</button>
+	</div>
 
 <script>
     var sudokuContainer = document.querySelector(".sudoku-container");
+	var sudokuErrorInfo = document.querySelector(".sudoku-error-info");
     var sudokus = []; // 存储生成的数独
 
     function generateSudokus() {
@@ -64,7 +71,7 @@
             var emptyCell = findFilledCell(sudoku);
             sudoku[emptyCell.row][emptyCell.col] = 0;
         }
-        shuffleSudoku(sudoku);
+        //shuffleSudoku(sudoku);
         return sudoku;
     }
 
@@ -84,14 +91,7 @@
         return null;
     }
 
-    function removeCells(sudoku, numCells) {
-        var emptyCells = getEmptyCells(sudoku);
-        var cellsToRemove = getRandomElements(emptyCells, numCells);
-        for (var i = 0; i < cellsToRemove.length; i++) {
-            var cell = cellsToRemove[i];
-            sudoku[cell.blockRow][cell.blockCol][cell.row][cell.col] = 0;
-        }
-    }
+
 
     function getRandomElements(arr, numElements) {
         var shuffled = arr.slice();
@@ -234,40 +234,6 @@
         }
     }
 
-    function shuffleSudoku(sudoku) {
-        // 随机打乱行
-        for (var i = 0; i < 0; i++) {
-            var startRow = i * 3;
-            var endRow = startRow + 2;
-            var randomRow = Math.floor(Math.random() * 3);
-            var temp = sudoku[startRow].slice();
-            sudoku[startRow] = sudoku[randomRow].slice();
-            sudoku[randomRow] = temp;
-            temp = sudoku[endRow].slice();
-            sudoku[endRow] = sudoku[randomRow + 6].slice();
-            sudoku[randomRow + 6] = temp;
-        }
-
-        // 随机打乱列
-        for (var i = 0; i < 0; i++) {
-            var startCol = i * 3;
-            var endCol = startCol + 2;
-            var randomCol = Math.floor(Math.random() * 3);
-
-            for (var row = 0; row < 9; row++) {
-                var temp = sudoku[row][startCol];
-                sudoku[row][startCol] = sudoku[row][startCol + randomCol];
-                sudoku[row][startCol + randomCol] = temp;
-            }
-
-            for (var box = 0; box < 3; box++) {
-                var randomBoxRow = Math.floor(Math.random() * 3);
-                var temp = sudoku[startCol + box][endCol];
-                sudoku[startCol + box][endCol] = sudoku[startCol + randomBoxRow][endCol];
-                sudoku[startCol + randomBoxRow][endCol] = temp;
-            }
-        }
-    }
 
     function displaySudoku(sudoku) {
         var table = document.createElement("table");
@@ -285,34 +251,78 @@
         }
         sudokuContainer.appendChild(table);
     }
+	
+	function dataError() {
+		sudokuErrorInfo.innerHTML = "";
+        var p = document.createElement("p");
+        p.innerText = "填入的数据不正确";
+		sudokuErrorInfo.appendChild(p);
+    }
+// 新增逻辑：在一个数组中，每个数字（1-9）只能出现一次
+function uniqueElements(array) {
+  var counts = Array(9).fill(0);
+  for (let i = 0; i < 9; i++) {
+    if (counts[array[i] - 1]++ > 0) return false;
+  }
+  return true;
+}
 
-    function verifySudokus() {
-        var isValid = true;
-        for (var i = 0; i < sudokus.length; i++) {
-            var table = sudokuContainer.children[i];
-            var rows = table.getElementsByTagName("tr");
-            var sudoku = sudokus[i];
-            for (var row = 0; row < 9; row++) {
-                var cols = rows[row].getElementsByTagName("td");
-                for (var col = 0; col < 9; col++) {
-                    var cell = cols[col];
-                    var value = parseInt(cell.innerText) || 0;
-                    if (value !== sudoku[row][col]) {
-                        isValid = false;
-                        cell.style.backgroundColor = "red"; // 错误的数字标记为红色背景
-                    } else {
-                        cell.style.backgroundColor = "white"; // 正确的数字恢复为白色背景
-                    }
+function verifySudokus() {
+    var isValid = true;
+	
+    for (var i = 0; i < sudokus.length; i++) {
+        var table = sudokuContainer.children[i];
+        var rows = table.getElementsByTagName("tr");
+        var sudoku = sudokus[i];
+		console.log(sudoku)
+        for (var row = 0; row < 9; row++) {
+            var rowValues = [];
+            var cols = rows[row].getElementsByTagName("td");
+            for (var col = 0; col < 9; col++) {
+                var cell = cols[col];
+                var value = parseInt(cell.innerText) || 0;
+                rowValues.push(value);
+                if (value !== sudoku[row][col]) {
+					console.log(value, row, col, sudoku[row][col]);
+                    isValid = false;
+                    cell.style.backgroundColor = "red";
+                } else {
+                    cell.style.backgroundColor = "white";
                 }
             }
+            // 新增逻辑：判断行值是否满足数独规则
+            if (!uniqueElements(rowValues)) isValid = false;
         }
 
-        if (isValid) {
-            alert("All sudokus are valid!");
-        } else {
-            alert("The number is not valid.");
+        // 新增逻辑：判断列值是否满足数独规则
+        for (var col = 0; col < 9; col++) {
+          var colValues = [];
+          for (var row = 0; row < 9; row++) {
+            colValues.push(parseInt(rows[row].getElementsByTagName("td")[col].innerText) || 0);
+          }
+          if (!uniqueElements(colValues)) isValid = false;
+        }
+
+        // 新增逻辑：判断每个3×3宫格是否满足数独规则
+        for (var boxRow = 0; boxRow < 3; boxRow++) {
+          for (var boxCol = 0; boxCol < 3; boxCol++) {
+            var boxValues = [];
+            for (var row = boxRow * 3; row < boxRow * 3 + 3; row++) {
+              for (var col = boxCol * 3; col < boxCol * 3 + 3; col++) {
+                boxValues.push(parseInt(rows[row].getElementsByTagName("td")[col].innerText) || 0);
+              }
+            }
+            if (!uniqueElements(boxValues)) isValid = false;
+          }
         }
     }
+
+    if (isValid) {
+        alert("All sudokus are valid!");
+    } else {
+        dataError();
+    }
+}
 </script>
 </body>
 </html>
