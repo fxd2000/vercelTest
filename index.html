@@ -37,7 +37,7 @@
 <body onload="generateSudokus()">
 <div class="sudoku-container"></div>
 <div class="sudoku-button-container">
-    <button onclick="generateSudokus()">开始游戏</button>
+    <button onclick="generateSudokus()">出题</button>
     <button onclick="verifySudokus()">提交</button>
 </div>
 
@@ -278,6 +278,7 @@
                 var value = sudoku[row][col];
                 td.innerText = value !== 0 ? value : "";
                 td.contentEditable = true; // 设置单元格可编辑
+				td.addEventListener("blur", verifySudokus, false); // 添加事件监听器   
                 tr.appendChild(td);
             }
             table.appendChild(tr);
@@ -309,7 +310,7 @@
         if (isValid) {
             alert("All sudokus are valid!");
         } else {
-            alert("There are errors in the sudokus.");
+            alert("The number is not valid.");
         }
     }
 </script>
