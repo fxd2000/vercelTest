@@ -58,20 +58,36 @@
         var numSudokus = 1; // 生成9个数独
         for (var i = 0; i < numSudokus; i++) {
             var sudoku = generateSudoku();
-            sudokus.push(sudoku); // 将数独添加到数组中
+            //sudokus.push(sudoku); // 将数独添加到数组中
             displaySudoku(sudoku);
         }
+		//console.log(sudokus);
     }
 
     function generateSudoku() {
         var sudoku = createEmptySudoku();
         solveSudoku(sudoku);
+		//console.log(sudoku);
+		
+		//实现二维数组的值拷贝
+		var copyArray = [];			
+		for (var i = 0; i < sudoku.length; i++) {
+			copyArray[i] = [];
+			for (var j = 0; j < sudoku[i].length; j++) {
+				copyArray[i][j] = sudoku[i][j];
+			}
+		}
+		sudokus.push(copyArray); // 将数独添加到数组中
+		//console.log(sudokus);
+		
+		
         removeCells(sudoku, 40);
         while (!hasUniqueSolution(sudoku)) {
             var emptyCell = findFilledCell(sudoku);
             sudoku[emptyCell.row][emptyCell.col] = 0;
         }
         //shuffleSudoku(sudoku);
+		//console.log(sudoku);
         return sudoku;
     }
 
@@ -243,7 +259,12 @@
                 var td = document.createElement("td");
                 var value = sudoku[row][col];
                 td.innerText = value !== 0 ? value : "";
-                td.contentEditable = true; // 设置单元格可编辑
+				if (value == 0){
+					td.contentEditable = true; // 设置单元格可编辑
+				}
+				else{
+					td.style.backgroundColor = "yellow";
+				}
 				td.addEventListener("blur", verifySudokus, false); // 添加事件监听器   
                 tr.appendChild(td);
             }
@@ -252,20 +273,13 @@
         sudokuContainer.appendChild(table);
     }
 	
-	function dataError() {
+	function tipInfo(info) {
 		sudokuErrorInfo.innerHTML = "";
         var p = document.createElement("p");
-        p.innerText = "填入的数据不正确";
+        p.innerText = info;
 		sudokuErrorInfo.appendChild(p);
     }
-// 新增逻辑：在一个数组中，每个数字（1-9）只能出现一次
-function uniqueElements(array) {
-  var counts = Array(9).fill(0);
-  for (let i = 0; i < 9; i++) {
-    if (counts[array[i] - 1]++ > 0) return false;
-  }
-  return true;
-}
+
 
 function verifySudokus() {
     var isValid = true;
@@ -274,6 +288,7 @@ function verifySudokus() {
         var table = sudokuContainer.children[i];
         var rows = table.getElementsByTagName("tr");
         var sudoku = sudokus[i];
+		var isFinish = true;
 		console.log(sudoku)
         for (var row = 0; row < 9; row++) {
             var rowValues = [];
@@ -282,47 +297,33 @@ function verifySudokus() {
                 var cell = cols[col];
                 var value = parseInt(cell.innerText) || 0;
                 rowValues.push(value);
-                if (value !== sudoku[row][col]) {
-					console.log(value, row, col, sudoku[row][col]);
+				if (0 === value){
+					isFinish = false;
+				}
+                if (0 !== value && value !== sudoku[row][col]) {
                     isValid = false;
                     cell.style.backgroundColor = "red";
                 } else {
-                    cell.style.backgroundColor = "white";
+					//console.log(row, col, cell.contentEditable)
+					if (cell.contentEditable === 'true'){
+						cell.style.backgroundColor = "white";
+					}                    
                 }
             }
-            // 新增逻辑：判断行值是否满足数独规则
-            if (!uniqueElements(rowValues)) isValid = false;
-        }
-
-        // 新增逻辑：判断列值是否满足数独规则
-        for (var col = 0; col < 9; col++) {
-          var colValues = [];
-          for (var row = 0; row < 9; row++) {
-            colValues.push(parseInt(rows[row].getElementsByTagName("td")[col].innerText) || 0);
-          }
-          if (!uniqueElements(colValues)) isValid = false;
-        }
-
-        // 新增逻辑：判断每个3×3宫格是否满足数独规则
-        for (var boxRow = 0; boxRow < 3; boxRow++) {
-          for (var boxCol = 0; boxCol < 3; boxCol++) {
-            var boxValues = [];
-            for (var row = boxRow * 3; row < boxRow * 3 + 3; row++) {
-              for (var col = boxCol * 3; col < boxCol * 3 + 3; col++) {
-                boxValues.push(parseInt(rows[row].getElementsByTagName("td")[col].innerText) || 0);
-              }
-            }
-            if (!uniqueElements(boxValues)) isValid = false;
-          }
-        }
+        } 
     }
-
+	if (!isFinish){
+		console.log("继续加油");
+		tipInfo("继续加油");
+		return;
+	}
     if (isValid) {
-        alert("All sudokus are valid!");
+        tipInfo("恭喜，完成挑战！");
     } else {
-        dataError();
+        tipInfo("遗憾，输入的数据有误");
     }
 }
+
 </script>
 </body>
 </html>
