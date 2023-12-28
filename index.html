@@ -32,7 +32,13 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-		.sudoku-error-info {
+	.sudoku-error-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+		
+	.sudoku-desc-info {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -40,6 +46,9 @@
     </style>
 </head>
 <body onload="generateSudokus()">
+	<div class="sudoku-desc-info">
+	<p>黄色表示初始值，不可修改<br>白色表示填写的值正确<br>红色表示填写的值不正确</p>
+	</div>
 	<div class="sudoku-container"></div>
 	<div class="sudoku-error-info"></div>
 	<div class="sudoku-button-container">
@@ -48,9 +57,9 @@
 	</div>
 
 <script>
-    var sudokuContainer = document.querySelector(".sudoku-container");
+	var sudokuContainer = document.querySelector(".sudoku-container");
 	var sudokuErrorInfo = document.querySelector(".sudoku-error-info");
-    var sudokus = []; // 存储生成的数独
+	var sudokus = []; // 存储生成的数独
 
     function generateSudokus() {
         sudokuContainer.innerHTML = "";
@@ -69,16 +78,16 @@
         solveSudoku(sudoku);
 		//console.log(sudoku);
 		
-		//实现二维数组的值拷贝
-		var copyArray = [];			
-		for (var i = 0; i < sudoku.length; i++) {
-			copyArray[i] = [];
-			for (var j = 0; j < sudoku[i].length; j++) {
-				copyArray[i][j] = sudoku[i][j];
-			}
+	//实现二维数组的值拷贝
+	var copyArray = [];			
+	for (var i = 0; i < sudoku.length; i++) {
+		copyArray[i] = [];
+		for (var j = 0; j < sudoku[i].length; j++) {
+			copyArray[i][j] = sudoku[i][j];
 		}
-		sudokus.push(copyArray); // 将数独添加到数组中
-		//console.log(sudokus);
+	}
+	sudokus.push(copyArray); // 将数独添加到数组中
+	//console.log(sudokus);
 		
 		
         removeCells(sudoku, 40);
@@ -259,13 +268,13 @@
                 var td = document.createElement("td");
                 var value = sudoku[row][col];
                 td.innerText = value !== 0 ? value : "";
-				if (value == 0){
-					td.contentEditable = true; // 设置单元格可编辑
-				}
-				else{
-					td.style.backgroundColor = "yellow";
-				}
-				td.addEventListener("blur", verifySudokus, false); // 添加事件监听器   
+		if (value == 0){
+			td.contentEditable = true; // 设置单元格可编辑
+		}
+		else{
+			td.style.backgroundColor = "yellow";
+		}
+		td.addEventListener("blur", verifySudokus, false); // 添加事件监听器   
                 tr.appendChild(td);
             }
             table.appendChild(tr);
@@ -275,8 +284,8 @@
 	
 	function tipInfo(info) {
 		sudokuErrorInfo.innerHTML = "";
-        var p = document.createElement("p");
-        p.innerText = info;
+	        var p = document.createElement("p");
+	        p.innerText = info;
 		sudokuErrorInfo.appendChild(p);
     }
 
@@ -288,8 +297,8 @@ function verifySudokus() {
         var table = sudokuContainer.children[i];
         var rows = table.getElementsByTagName("tr");
         var sudoku = sudokus[i];
-		var isFinish = true;
-		console.log(sudoku)
+	var isFinish = true;
+	console.log(sudoku);
         for (var row = 0; row < 9; row++) {
             var rowValues = [];
             var cols = rows[row].getElementsByTagName("td");
@@ -297,17 +306,17 @@ function verifySudokus() {
                 var cell = cols[col];
                 var value = parseInt(cell.innerText) || 0;
                 rowValues.push(value);
-				if (0 === value){
-					isFinish = false;
-				}
+		if (0 === value){
+			isFinish = false;
+		}
                 if (0 !== value && value !== sudoku[row][col]) {
                     isValid = false;
                     cell.style.backgroundColor = "red";
                 } else {
-					//console.log(row, col, cell.contentEditable)
-					if (cell.contentEditable === 'true'){
-						cell.style.backgroundColor = "white";
-					}                    
+			//console.log(row, col, cell.contentEditable)
+			if (cell.contentEditable === 'true'){
+				cell.style.backgroundColor = "white";
+			}                    
                 }
             }
         } 
